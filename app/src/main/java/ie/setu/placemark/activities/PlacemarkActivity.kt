@@ -1,6 +1,7 @@
 package ie.setu.placemark.activities
 
 import android.content.Intent
+import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.Menu
@@ -16,6 +17,7 @@ import ie.setu.placemark.main.MainApp
 import ie.setu.placemark.models.PlacemarkModel
 import timber.log.Timber
 import timber.log.Timber.Forest.i
+import ie.setu.placemark.models.Location
 
 class PlacemarkActivity : AppCompatActivity() {
 
@@ -23,7 +25,8 @@ class PlacemarkActivity : AppCompatActivity() {
     var placemark = PlacemarkModel()
     lateinit var app: MainApp
     private lateinit var imageIntentLauncher : ActivityResultLauncher<Intent>
-    val IMAGE_REQUEST = 1
+    private lateinit var mapIntentLauncher : ActivityResultLauncher<Intent>
+    var location = Location(52.245696, -7.139102, 15f)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -48,6 +51,10 @@ class PlacemarkActivity : AppCompatActivity() {
             Picasso.get()
                 .load(placemark.image)
                 .into(binding.placemarkImage)
+            if (placemark.image != Uri.EMPTY) {
+                binding.chooseImage.setText(R.string.change_placemark_image)
+            }
+
         }
 
         binding.btnAdd.setOnClickListener() {
@@ -72,7 +79,14 @@ class PlacemarkActivity : AppCompatActivity() {
             showImagePicker(imageIntentLauncher)
         }
 
+        binding.placemarkLocation.setOnClickListener {
+            val launcherIntent = Intent(this, MapActivity::class.java)
+                .putExtra("location", location)
+            mapIntentLauncher.launch(launcherIntent)
+        }
+
         registerImagePickerCallback()
+        registerMapCallback()
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -101,6 +115,24 @@ class PlacemarkActivity : AppCompatActivity() {
                             Picasso.get()
                                 .load(placemark.image)
                                 .into(binding.placemarkImage)
+                            binding.chooseImage.setText(R.string.change_placemark_image)
+                        } // end of if
+                    }
+                    RESULT_CANCELED -> { } else -> { }
+                }
+            }
+    }
+
+    private fun registerMapCallback() {
+        mapIntentLauncher =
+            registerForActivityResult(ActivityResultContracts.StartActivityForResult())
+            { result ->
+                when (result.resultCode) {
+                    RESULT_OK -> {
+                        if (result.data != null) {
+                            i("Got Location ${result.data.toString()}")
+                            location = result.data!!.extras?.getParcelable("location")!!
+                            i("Location == $location")
                         } // end of if
                     }
                     RESULT_CANCELED -> { } else -> { }
