@@ -26,12 +26,12 @@ class PlacemarkActivity : AppCompatActivity() {
     lateinit var app: MainApp
     private lateinit var imageIntentLauncher : ActivityResultLauncher<Intent>
     private lateinit var mapIntentLauncher : ActivityResultLauncher<Intent>
-    // var location = Location(52.245696, -7.139102, 15f)
+    var edit = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        var edit = false
+        edit = false
 
         binding = ActivityPlacemarkBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -71,6 +71,7 @@ class PlacemarkActivity : AppCompatActivity() {
                 }
             }
             i("add Button Pressed: $placemark")
+
             setResult(RESULT_OK)
             finish()
         }
@@ -97,11 +98,17 @@ class PlacemarkActivity : AppCompatActivity() {
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.menu_placemark, menu)
+        if (edit) menu.getItem(0).isVisible = true
         return super.onCreateOptionsMenu(menu)
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
+            R.id.item_delete -> {
+                setResult(99)
+                app.placemarks.delete(placemark)
+                finish()
+            }
             R.id.item_cancel -> {
                 finish()
             }

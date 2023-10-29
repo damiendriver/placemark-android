@@ -15,6 +15,7 @@ class MainApp : Application() {
     override fun onCreate() {
         super.onCreate()
         Timber.plant(Timber.DebugTree())
+        // placemarks = PlacemarkMemStore()
         placemarks = PlacemarkJSONStore(applicationContext)
         i("Placemark started")
     }
